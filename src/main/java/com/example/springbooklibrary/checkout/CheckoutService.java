@@ -1,8 +1,11 @@
 package com.example.springbooklibrary.checkout;
+import com.example.springbooklibrary.book.Book;
 import com.example.springbooklibrary.book.BookRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+import java.util.function.Predicate;
 
 @Service
 public class CheckoutService {
@@ -42,6 +45,24 @@ public class CheckoutService {
 
     static boolean isCheckedOutBy(Checkout checkout, LocalDateTime time, String name) {
         return checkout.getName().equals(name) && isCheckedOut(checkout, time);
+    }
+
+    static boolean isBookCheckedOut(Checkout checkout, LocalDateTime time, UUID bookId) {
+        return checkout.getBookId().equals(bookId) && isCheckedOut(checkout, time);
+    }
+
+    public boolean isBookCheckedOut(UUID bookId) {
+        LocalDateTime now = LocalDateTime.now();
+        for (Checkout checkout : checkoutRepository.getAll()) {
+            if (isBookCheckedOut(checkout, now, bookId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Predicate<Book> isBookCheckedOut() {
+        return book -> isBookCheckedOut(book.getId());
     }
 
 }

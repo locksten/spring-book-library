@@ -8,14 +8,16 @@ import java.util.UUID;
 @RestController
 public class BookController {
     private final BookRepository bookRepository;
+    private final BookService bookService;
 
-    BookController(BookRepository bookRepository) {
+    BookController(BookRepository bookRepository, BookService bookService) {
         this.bookRepository = bookRepository;
+        this.bookService = bookService;
     }
 
     @GetMapping("/books")
-    public Collection<Book> all() {
-        return bookRepository.getAll();
+    public Collection<Book> all(BookRepository.Filters filters) {
+        return bookService.getBooks(filters);
     }
 
     @GetMapping("/books/{id}")
@@ -23,15 +25,13 @@ public class BookController {
         return bookRepository.getById(id);
     }
 
-    @PostMapping("/books")
-    Book newBook(@RequestBody Book newBook) {
-        return bookRepository.add(newBook);
-    }
-
     @DeleteMapping("/books/{id}")
     void deleteOne(@PathVariable UUID id) {
         bookRepository.remove(id);
     }
 
-
+    @PostMapping("/books")
+    Book newBook(@RequestBody Book newBook) {
+        return bookRepository.add(newBook);
+    }
 }
