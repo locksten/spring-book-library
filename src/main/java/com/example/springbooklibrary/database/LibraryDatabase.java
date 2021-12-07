@@ -2,6 +2,7 @@ package com.example.springbooklibrary.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,10 @@ public class LibraryDatabase implements ILibraryDatabase {
         this.libraryData = readFromJsonDatabaseFile(LibraryData.class);
     }
 
+    public void save() {
+        writeToJsonDatabaseFile(libraryData);
+    }
+
     public static <T> T readFromJsonDatabaseFile(Class<T> c) {
         try {
             String text = Files.readString(Paths.get("/tmp/spring.json"));
@@ -29,8 +34,14 @@ public class LibraryDatabase implements ILibraryDatabase {
         return null;
     }
 
-    public void save() {
-        System.out.println("SAVE DB");
+    public static void writeToJsonDatabaseFile(Object data) {
+        try {
+            ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+            mapper.setDateFormat(new StdDateFormat());
+            mapper.writerWithDefaultPrettyPrinter().writeValue(Paths.get("/tmp/spring.json").toFile(), data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public LibraryData getData() {
