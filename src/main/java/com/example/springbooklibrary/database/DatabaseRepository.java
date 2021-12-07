@@ -22,10 +22,14 @@ public class DatabaseRepository<Id, T> {
         return this.map.get(id);
     }
 
+    public boolean exists(Id id) {
+        return this.map.get(id) != null;
+    }
+
     public T add(Id id, T entity) {
-        T value = this.map.put(id, entity);
+        this.map.put(id, entity);
         database.save();
-        return value;
+        return entity;
     }
 
     public void remove(Id id) {
