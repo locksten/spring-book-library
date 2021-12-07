@@ -38,4 +38,20 @@ public class Checkout {
     public UUID getBookId() {
         return bookId;
     }
+
+    public void setBookId(UUID bookId) {
+        this.bookId = bookId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStart(LocalDateTime start) {
+        this.start = start;
+    }
+
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
+    }
 }

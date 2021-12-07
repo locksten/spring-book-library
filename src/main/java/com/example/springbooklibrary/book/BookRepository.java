@@ -16,7 +16,7 @@ public class BookRepository extends DatabaseRepository<UUID, Book> {
         super(libraryDatabase, libraryDatabase.getData().getBooks());
     }
 
-    final static class Filters {
+    public final static class Filters {
         private String title;
         private String author;
         private String category;
@@ -94,7 +94,7 @@ public class BookRepository extends DatabaseRepository<UUID, Book> {
     }
 
     public Collection<Book> getAll(Filters filters, Predicate<Book> isCheckedOut) {
-        Collection<Book> books = this.map.values();
+        Collection<Book> books = getAll();
 
         Predicate<Book> predicates = book -> true;
         if (filters.title != null) predicates = predicates.and(matchesTitle(filters.title));

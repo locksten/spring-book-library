@@ -7,6 +7,7 @@ import com.example.springbooklibrary.exception.CheckoutEndBeforeStartException;
 import com.example.springbooklibrary.exception.TooManyCheckoutsException;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -14,8 +15,8 @@ import java.util.function.Predicate;
 
 @Service
 public class CheckoutService {
-    private static final int MAX_CHECKOUTS_PER_PERSON = 3;
-    private static final Duration MAX_CHECKOUT_DURATION = Duration.ofDays(2 * 30);
+    private final int maxCheckoutsPerPerson = 3;
+    private final Duration maxCheckoutDuration = Duration.ofDays(2 * 30);
 
     private final BookRepository bookRepository;
     private final CheckoutRepository checkoutRepository;
@@ -28,10 +29,10 @@ public class CheckoutService {
     public Checkout checkOutBook(Checkout checkout) {
         if (!bookRepository.exists(checkout.getBookId())) throw new BookNotFoundException();
         if (checkout.getEnd().isBefore(checkout.getStart())) throw new CheckoutEndBeforeStartException();
-        if (!checkout.getStart().plus(MAX_CHECKOUT_DURATION).isAfter(checkout.getEnd()))
-            throw new CheckoutDurationTooLongException(MAX_CHECKOUT_DURATION);
-        if (isUsersNumberOfCheckoutsDuringCheckoutGreaterThan(checkout, MAX_CHECKOUTS_PER_PERSON))
-            throw new TooManyCheckoutsException(MAX_CHECKOUTS_PER_PERSON);
+        if (checkout.getStart().plus(getMaxCheckoutDuration()).isBefore(checkout.getEnd()))
+            throw new CheckoutDurationTooLongException(getMaxCheckoutDuration());
+        if (isUsersNumberOfCheckoutsDuringCheckoutGreaterThan(checkout, getMaxCheckoutsPerPerson()))
+            throw new TooManyCheckoutsException(getMaxCheckoutsPerPerson());
 
         return checkoutRepository.add(checkout);
     }
@@ -68,7 +69,7 @@ public class CheckoutService {
     }
 
     private boolean isBookCurrentlyCheckedOut(UUID bookId) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(getClock());
         for (Checkout checkout : checkoutRepository.getAll()) {
             if (isBookCheckedOut(checkout, now, bookId)) {
                 return true;
@@ -79,6 +80,18 @@ public class CheckoutService {
 
     public Predicate<Book> isBookCurrentlyCheckedOut() {
         return book -> isBookCurrentlyCheckedOut(book.getId());
+    }
+
+    public int getMaxCheckoutsPerPerson() {
+        return maxCheckoutsPerPerson;
+    }
+
+    public Duration getMaxCheckoutDuration() {
+        return maxCheckoutDuration;
+    }
+
+    public Clock getClock() {
+        return Clock.systemDefaultZone();
     }
 
 }
