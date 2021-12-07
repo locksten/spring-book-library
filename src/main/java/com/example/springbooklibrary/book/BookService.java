@@ -10,13 +10,13 @@ public class BookService {
     private final BookRepository bookRepository;
     private final CheckoutService checkoutService;
 
-    BookService(BookRepository bookRepository, CheckoutService checkoutService){
+    public BookService(BookRepository bookRepository, CheckoutService checkoutService){
         this.bookRepository = bookRepository;
         this.checkoutService = checkoutService;
     }
 
     public Collection<Book> getBooks(BookRepository.Filters filters) {
-        return bookRepository.getAll(filters, this.checkoutService.isBookCheckedOut());
+        return bookRepository.getAll(filters, this.checkoutService.isBookCurrentlyCheckedOut());
     }
 
 }

@@ -18,7 +18,7 @@ public class CheckoutController {
         this.checkoutService = checkoutService;
     }
 
-    final static class CheckoutRequest {
+    private final static class CheckoutRequest {
         @NotNull
         private UUID bookId;
 

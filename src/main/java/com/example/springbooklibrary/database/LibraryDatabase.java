@@ -7,40 +7,39 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
 public class LibraryDatabase implements ILibraryDatabase {
+    private final static Path DATABASE_PATH = Paths.get("SpringBookLibrary.json");
 
     private final LibraryData libraryData;
 
-    public LibraryDatabase() {
+    public LibraryDatabase() throws IOException {
         this.libraryData = readFromJsonDatabaseFile(LibraryData.class);
     }
 
-    public void save() {
+    public void save() throws IOException {
         writeToJsonDatabaseFile(libraryData);
     }
 
-    public static <T> T readFromJsonDatabaseFile(Class<T> c) {
+    public static <T> T readFromJsonDatabaseFile(Class<T> c) throws IOException {
         try {
-            String text = Files.readString(Paths.get("/tmp/spring.json"));
             ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-            return mapper.readValue(text, c);
-        } catch (IOException e) {
-            e.printStackTrace();
+            return mapper.readValue(DATABASE_PATH.toFile(), c);
+        } catch (Exception e) {
+            throw new IOException("Failed to read database.", e);
         }
-        return null;
     }
 
-    public static void writeToJsonDatabaseFile(Object data) {
+    public static void writeToJsonDatabaseFile(Object data) throws IOException {
         try {
             ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
             mapper.setDateFormat(new StdDateFormat());
-            mapper.writerWithDefaultPrettyPrinter().writeValue(Paths.get("/tmp/spring.json").toFile(), data);
-        } catch (IOException e) {
-            e.printStackTrace();
+            mapper.writerWithDefaultPrettyPrinter().writeValue(DATABASE_PATH.toFile(), data);
+        } catch (Exception e) {
+            throw new IOException("Failed to write database.", e);
         }
     }
 

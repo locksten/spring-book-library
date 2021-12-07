@@ -16,7 +16,7 @@ public class BookController {
     }
 
     @GetMapping("/books")
-    public Collection<Book> all(BookRepository.Filters filters) {
+    Collection<Book> all(BookRepository.Filters filters) {
         return bookService.getBooks(filters);
     }
 

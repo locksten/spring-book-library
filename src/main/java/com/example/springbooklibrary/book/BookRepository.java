@@ -73,23 +73,23 @@ public class BookRepository extends DatabaseRepository<UUID, Book> {
         }
     }
 
-    public static Predicate<Book> matchesTitle(String title) {
+    private static Predicate<Book> matchesTitle(String title) {
         return book -> book.getTitle().contains(title);
     }
 
-    public static Predicate<Book> matchesAuthor(String author) {
+    private static Predicate<Book> matchesAuthor(String author) {
         return book -> book.getAuthor().equals(author);
     }
 
-    public static Predicate<Book> matchesCategory(String category) {
+    private static Predicate<Book> matchesCategory(String category) {
         return book -> book.getCategory().equals(category);
     }
 
-    public static Predicate<Book> matchesLanguage(String language) {
+    private static Predicate<Book> matchesLanguage(String language) {
         return book -> book.getLanguage().equals(language);
     }
 
-    public static Predicate<Book> matchesIsbn(String isbn) {
+    private static Predicate<Book> matchesIsbn(String isbn) {
         return book -> book.getIsbn().equals(isbn);
     }
 
@@ -102,7 +102,7 @@ public class BookRepository extends DatabaseRepository<UUID, Book> {
         if (filters.category != null) predicates = predicates.and(matchesCategory(filters.category));
         if (filters.language != null) predicates = predicates.and(matchesLanguage(filters.language));
         if (filters.isbn != null) predicates = predicates.and(matchesIsbn(filters.isbn));
-        if (filters.isCheckedOut != null) predicates = predicates.and(isCheckedOut);
+        if (filters.isCheckedOut != null) predicates = predicates.and(filters.isCheckedOut ? isCheckedOut : isCheckedOut.negate());
 
         return books.stream().filter(predicates).collect(Collectors.toList());
     }

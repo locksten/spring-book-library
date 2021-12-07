@@ -1,5 +1,9 @@
 package com.example.springbooklibrary.database;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,21 +23,32 @@ public class DatabaseRepository<Id, T> {
     }
 
     public T getById(Id id) {
-        return this.map.get(id);
+        T value = this.map.get(id);
+        if (value == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return value;
     }
 
     public boolean exists(Id id) {
-        return this.map.get(id) != null;
+        return this.map.containsKey(id);
     }
 
     public T add(Id id, T entity) {
-        this.map.put(id, entity);
-        database.save();
+        T originalValue = this.map.putIfAbsent(id, entity);
+        if (originalValue != null) throw new ResponseStatusException(HttpStatus.CONFLICT);
+        try {
+            database.save();
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return entity;
     }
 
     public void remove(Id id) {
         this.map.remove(id);
-        database.save();
+        try {
+            database.save();
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
